@@ -1,28 +1,46 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:get/get.dart';
 
+import '../../controllers/stock_transaction_controller.dart';
 import '../../models/item.dart';
 import '../../models/stock_transaction.dart';
-import '../../viewmodels/stock_transaction_viewmodel.dart';
 
 /// Lets the user record a Stock In / Stock Out / Adjustment against a
 /// single item, and shows that item's movement history below the form.
-class StockTransactionScreen extends StatelessWidget {
+class StockTransactionScreen extends StatefulWidget {
   const StockTransactionScreen({super.key, required this.item});
 
   final Item item;
 
   @override
+  State<StockTransactionScreen> createState() => _StockTransactionScreenState();
+}
+
+class _StockTransactionScreenState extends State<StockTransactionScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Get.put(StockTransactionController(item: widget.item))..loadHistory();
+  }
+
+  @override
+  void dispose() {
+    Get.delete<StockTransactionController>();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => StockTransactionViewModel(item: item)..loadHistory(),
-      child: const _StockTransactionBody(),
+    return GetBuilder<StockTransactionController>(
+      builder: (vm) => _StockTransactionBody(vm: vm),
     );
   }
 }
 
 class _StockTransactionBody extends StatefulWidget {
-  const _StockTransactionBody();
+  const _StockTransactionBody({required this.vm});
+
+  final StockTransactionController vm;
 
   @override
   State<_StockTransactionBody> createState() => _StockTransactionBodyState();
@@ -41,7 +59,7 @@ class _StockTransactionBodyState extends State<_StockTransactionBody> {
   }
 
   Future<void> _submit() async {
-    final vm = context.read<StockTransactionViewModel>();
+    final vm = widget.vm;
     final amount = double.tryParse(_amountCtrl.text);
     if (amount == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -69,7 +87,7 @@ class _StockTransactionBodyState extends State<_StockTransactionBody> {
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<StockTransactionViewModel>();
+    final vm = widget.vm;
 
     return Scaffold(
       appBar: AppBar(title: Text('Stock Movements · ${vm.item.name}')),

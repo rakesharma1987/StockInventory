@@ -1,29 +1,45 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:get/get.dart';
 
-import '../../viewmodels/category_viewmodel.dart';
+import '../../controllers/category_controller.dart';
 import '../../widgets/empty_state.dart';
 import 'category_form_screen.dart';
 
-class CategoryListScreen extends StatelessWidget {
+class CategoryListScreen extends StatefulWidget {
   const CategoryListScreen({super.key});
 
   @override
+  State<CategoryListScreen> createState() => _CategoryListScreenState();
+}
+
+class _CategoryListScreenState extends State<CategoryListScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Get.put(CategoryController())..load();
+  }
+
+  @override
+  void dispose() {
+    Get.delete<CategoryController>();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => CategoryViewModel()..load(),
-      child: const _CategoryListBody(),
+    return GetBuilder<CategoryController>(
+      builder: (vm) => _CategoryListBody(vm: vm),
     );
   }
 }
 
 class _CategoryListBody extends StatelessWidget {
-  const _CategoryListBody();
+  const _CategoryListBody({required this.vm});
+
+  final CategoryController vm;
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<CategoryViewModel>();
-
     return Scaffold(
       appBar: AppBar(title: const Text('Categories')),
       body: vm.isLoading

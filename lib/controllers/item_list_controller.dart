@@ -1,14 +1,14 @@
-import 'package:flutter/foundation.dart' hide Category;
+import 'package:get/get.dart' hide Category;
 
 import '../models/category.dart';
 import '../models/item.dart';
 import '../repositories/category_repository.dart';
 import '../repositories/item_repository.dart';
-import 'dashboard_viewmodel.dart';
+import 'view_state.dart';
 
 /// Backs the item list / search / filter screen.
-class ItemListViewModel extends ChangeNotifier {
-  ItemListViewModel({
+class ItemListController extends GetxController {
+  ItemListController({
     ItemRepository? itemRepository,
     CategoryRepository? categoryRepository,
   })  : _itemRepository = itemRepository ?? ItemRepository(),
@@ -33,12 +33,12 @@ class ItemListViewModel extends ChangeNotifier {
 
   Future<void> loadCategories() async {
     categories = await _categoryRepository.getAll();
-    notifyListeners();
+    update();
   }
 
   Future<void> loadItems() async {
     state = ViewState.loading;
-    notifyListeners();
+    update();
     try {
       items = await _itemRepository.search(
         query: searchQuery,
@@ -50,7 +50,7 @@ class ItemListViewModel extends ChangeNotifier {
       state = ViewState.error;
       errorMessage = e.toString();
     }
-    notifyListeners();
+    update();
   }
 
   void setSearchQuery(String value) {

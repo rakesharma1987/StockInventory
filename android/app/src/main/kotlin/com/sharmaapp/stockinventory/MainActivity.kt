@@ -1,4 +1,4 @@
-package com.example.stock_inventory
+package com.sharmaapp.stockinventory
 
 import io.flutter.embedding.android.FlutterActivity
 

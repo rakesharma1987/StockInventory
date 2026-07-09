@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:get/get.dart';
 
 import '../models/item.dart';
 import '../models/stock_transaction.dart';
@@ -7,8 +7,8 @@ import '../repositories/transaction_repository.dart';
 
 /// Backs the "stock in / stock out / adjust" screen for a single item,
 /// and its transaction history list.
-class StockTransactionViewModel extends ChangeNotifier {
-  StockTransactionViewModel({
+class StockTransactionController extends GetxController {
+  StockTransactionController({
     required this.item,
     ItemRepository? itemRepository,
     TransactionRepository? transactionRepository,
@@ -25,10 +25,10 @@ class StockTransactionViewModel extends ChangeNotifier {
 
   Future<void> loadHistory() async {
     isLoading = true;
-    notifyListeners();
+    update();
     history = await _transactionRepository.getForItem(item.id!);
     isLoading = false;
-    notifyListeners();
+    update();
   }
 
   /// Applies a movement and refreshes the local [item] + [history].
@@ -46,7 +46,7 @@ class StockTransactionViewModel extends ChangeNotifier {
     }
 
     isSubmitting = true;
-    notifyListeners();
+    update();
     try {
       await _transactionRepository.recordTransaction(
         itemId: item.id!,
@@ -62,7 +62,7 @@ class StockTransactionViewModel extends ChangeNotifier {
       return e.toString();
     } finally {
       isSubmitting = false;
-      notifyListeners();
+      update();
     }
   }
 }

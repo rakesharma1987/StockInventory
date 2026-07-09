@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:get/get.dart';
 
 import '../models/item.dart';
 import '../repositories/item_repository.dart';
@@ -8,8 +8,8 @@ enum ScanLookupResult { found, notFound, idle }
 /// Backs the barcode scanner screen. Given a scanned code, looks the item
 /// up so the View can decide whether to open the item's detail page or
 /// offer to create a new item pre-filled with that barcode.
-class ScannerViewModel extends ChangeNotifier {
-  ScannerViewModel({ItemRepository? itemRepository})
+class ScannerController extends GetxController {
+  ScannerController({ItemRepository? itemRepository})
       : _itemRepository = itemRepository ?? ItemRepository();
 
   final ItemRepository _itemRepository;
@@ -29,13 +29,13 @@ class ScannerViewModel extends ChangeNotifier {
     foundItem = item;
     result = item != null ? ScanLookupResult.found : ScanLookupResult.notFound;
     _isLookingUp = false;
-    notifyListeners();
+    update();
   }
 
   void reset() {
     result = ScanLookupResult.idle;
     foundItem = null;
     lastScannedCode = null;
-    notifyListeners();
+    update();
   }
 }

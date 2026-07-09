@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart' hide Category;
+import 'package:get/get.dart' hide Category;
 
 import '../models/category.dart';
 import '../models/item.dart';
@@ -8,8 +8,8 @@ import '../repositories/item_repository.dart';
 /// Backs the "add / edit item" form. Holds a working copy of the item's
 /// fields as plain properties (simpler for TextEditingControllers to bind
 /// to than re-building an immutable [Item] on every keystroke).
-class ItemFormViewModel extends ChangeNotifier {
-  ItemFormViewModel({
+class ItemFormController extends GetxController {
+  ItemFormController({
     Item? existingItem,
     ItemRepository? itemRepository,
     CategoryRepository? categoryRepository,
@@ -54,17 +54,17 @@ class ItemFormViewModel extends ChangeNotifier {
       categoryId = categories.first.id;
     }
     categoriesLoaded = true;
-    notifyListeners();
+    update();
   }
 
   void setBarcode(String value) {
     barcode = value;
-    notifyListeners();
+    update();
   }
 
   void setCategoryId(int? value) {
     categoryId = value;
-    notifyListeners();
+    update();
   }
 
   /// Validates + persists the item. Returns null on success, or an error
@@ -74,7 +74,7 @@ class ItemFormViewModel extends ChangeNotifier {
       return 'Item name is required.';
     }
     isSaving = true;
-    notifyListeners();
+    update();
 
     try {
       final trimmedBarcode = barcode.trim();
@@ -113,7 +113,7 @@ class ItemFormViewModel extends ChangeNotifier {
       return 'Failed to save item: $e';
     } finally {
       isSaving = false;
-      notifyListeners();
+      update();
     }
   }
 }

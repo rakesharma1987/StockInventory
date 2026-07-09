@@ -1,14 +1,13 @@
-import 'package:flutter/foundation.dart';
+import 'package:get/get.dart';
 
 import '../models/stock_transaction.dart';
 import '../repositories/item_repository.dart';
 import '../repositories/transaction_repository.dart';
-
-enum ViewState { idle, loading, error }
+import 'view_state.dart';
 
 /// Powers the dashboard/home screen: quick counters + recent activity.
-class DashboardViewModel extends ChangeNotifier {
-  DashboardViewModel({
+class DashboardController extends GetxController {
+  DashboardController({
     ItemRepository? itemRepository,
     TransactionRepository? transactionRepository,
   })  : _itemRepository = itemRepository ?? ItemRepository(),
@@ -27,7 +26,7 @@ class DashboardViewModel extends ChangeNotifier {
 
   Future<void> load() async {
     state = ViewState.loading;
-    notifyListeners();
+    update();
     try {
       totalItems = await _itemRepository.countAll();
       lowStockCount = await _itemRepository.countLowStock();
@@ -38,6 +37,6 @@ class DashboardViewModel extends ChangeNotifier {
       state = ViewState.error;
       errorMessage = e.toString();
     }
-    notifyListeners();
+    update();
   }
 }

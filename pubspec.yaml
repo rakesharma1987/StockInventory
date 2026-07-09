@@ -11,8 +11,8 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.6
 
-  # State management (MVVM: ViewModels are ChangeNotifiers exposed via Provider)
-  provider: ^6.1.2
+  # State management (MVVM: ViewModels are GetxControllers, wired up with GetX)
+  get: ^4.6.6
 
   # Local database (offline storage)
   sqflite: ^2.3.3
@@ -29,6 +29,14 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.14.4
 
 flutter:
   uses-material-design: true
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/icon_stock.png"
+  min_sdk_android: 21
+  remove_alpha_ios: true

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-import '../../viewmodels/dashboard_viewmodel.dart';
+import '../../controllers/dashboard_controller.dart';
 import '../categories/category_list_screen.dart';
 import '../dashboard/dashboard_screen.dart';
 import '../items/item_list_screen.dart';
@@ -11,9 +12,9 @@ import '../scanner/barcode_scanner_screen.dart';
 ///
 /// IndexedStack keeps all four tabs mounted (so e.g. Items' search text
 /// survives switching tabs), which also means DashboardScreen's own
-/// `initState`/ViewModel-create only runs once, ever - it would otherwise
+/// `initState`/controller-create only runs once, ever - it would otherwise
 /// never pick up items/categories/stock changes made from other tabs. To
-/// fix that, the Dashboard's ViewModel is created and owned here instead of
+/// fix that, the Dashboard's controller is created and owned here instead of
 /// inside DashboardScreen, and gets refreshed every time the Dashboard tab
 /// is (re)selected.
 class AppShell extends StatefulWidget {
@@ -25,17 +26,17 @@ class AppShell extends StatefulWidget {
 
 class _AppShellState extends State<AppShell> {
   int _index = 0;
-  late final DashboardViewModel _dashboardViewModel;
+  late final DashboardController _dashboardController;
 
   @override
   void initState() {
     super.initState();
-    _dashboardViewModel = DashboardViewModel()..load();
+    _dashboardController = Get.put(DashboardController())..load();
   }
 
   @override
   void dispose() {
-    _dashboardViewModel.dispose();
+    Get.delete<DashboardController>();
     super.dispose();
   }
 
@@ -43,7 +44,7 @@ class _AppShellState extends State<AppShell> {
     if (index == 0) {
       // Refresh dashboard stats/activity every time it becomes the active
       // tab, since data may have changed while the user was on another tab.
-      _dashboardViewModel.load();
+      _dashboardController.load();
     }
     setState(() => _index = index);
   }
@@ -51,7 +52,7 @@ class _AppShellState extends State<AppShell> {
   @override
   Widget build(BuildContext context) {
     final screens = [
-      DashboardScreen(viewModel: _dashboardViewModel),
+      DashboardScreen(controller: _dashboardController),
       const ItemListScreen(),
       const BarcodeScannerScreen(),
       const CategoryListScreen(),

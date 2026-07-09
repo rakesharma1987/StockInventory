@@ -1,35 +1,50 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:get/get.dart';
 
+import '../../controllers/item_form_controller.dart';
 import '../../models/item.dart';
-import '../../viewmodels/item_form_viewmodel.dart';
 import '../scanner/barcode_scanner_screen.dart';
 
 /// Add or edit an [Item]. Pass [existingItem] to edit; omit to create new.
 /// [prefilledBarcode] is used when arriving here from the scanner after a
 /// scanned code didn't match any existing item.
-class ItemFormScreen extends StatelessWidget {
+class ItemFormScreen extends StatefulWidget {
   const ItemFormScreen({super.key, this.existingItem, this.prefilledBarcode});
 
   final Item? existingItem;
   final String? prefilledBarcode;
 
   @override
+  State<ItemFormScreen> createState() => _ItemFormScreenState();
+}
+
+class _ItemFormScreenState extends State<ItemFormScreen> {
+  @override
+  void initState() {
+    super.initState();
+    final vm = Get.put(ItemFormController(existingItem: widget.existingItem));
+    if (widget.prefilledBarcode != null) vm.barcode = widget.prefilledBarcode!;
+    vm.loadCategories();
+  }
+
+  @override
+  void dispose() {
+    Get.delete<ItemFormController>();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) {
-        final vm = ItemFormViewModel(existingItem: existingItem);
-        if (prefilledBarcode != null) vm.barcode = prefilledBarcode!;
-        vm.loadCategories();
-        return vm;
-      },
-      child: const _ItemFormBody(),
+    return GetBuilder<ItemFormController>(
+      builder: (vm) => _ItemFormBody(vm: vm),
     );
   }
 }
 
 class _ItemFormBody extends StatefulWidget {
-  const _ItemFormBody();
+  const _ItemFormBody({required this.vm});
+
+  final ItemFormController vm;
 
   @override
   State<_ItemFormBody> createState() => _ItemFormBodyState();
@@ -48,7 +63,7 @@ class _ItemFormBodyState extends State<_ItemFormBody> {
   @override
   void initState() {
     super.initState();
-    final vm = context.read<ItemFormViewModel>();
+    final vm = widget.vm;
     _nameCtrl = TextEditingController(text: vm.name);
     _barcodeCtrl = TextEditingController(text: vm.barcode);
     _quantityCtrl = TextEditingController(text: vm.quantity == 0 ? '' : vm.quantity.toString());
@@ -76,13 +91,13 @@ class _ItemFormBodyState extends State<_ItemFormBody> {
     );
     if (code != null) {
       _barcodeCtrl.text = code;
-      context.read<ItemFormViewModel>().setBarcode(code);
+      widget.vm.setBarcode(code);
     }
   }
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    final vm = context.read<ItemFormViewModel>();
+    final vm = widget.vm;
     vm.name = _nameCtrl.text;
     vm.barcode = _barcodeCtrl.text;
     vm.quantity = double.tryParse(_quantityCtrl.text) ?? 0;
@@ -102,7 +117,7 @@ class _ItemFormBodyState extends State<_ItemFormBody> {
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<ItemFormViewModel>();
+    final vm = widget.vm;
 
     return Scaffold(
       appBar: AppBar(title: Text(vm.isEditing ? 'Edit Item' : 'New Item')),

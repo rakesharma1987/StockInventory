@@ -3,16 +3,13 @@ import 'package:flutter/material.dart';
 import '../../models/category.dart';
 import '../../repositories/category_repository.dart';
 
-/// Talks to [CategoryRepository] directly rather than reading a
-/// CategoryViewModel from context.
+/// Talks to [CategoryRepository] directly rather than going through
+/// CategoryController.
 ///
-/// This screen is opened via Navigator.push from CategoryListScreen, which
-/// puts it in a *new*, separate route - not a descendant of the
-/// ChangeNotifierProvider<CategoryViewModel> that CategoryListScreen wraps
-/// around its own body. Reading that provider here would throw
-/// ProviderNotFoundException. The caller already reloads its list after
-/// this screen pops, so this screen doesn't need to touch that ViewModel at
-/// all - it just needs to save and get out of the way.
+/// This screen is opened via Navigator.push from CategoryListScreen. The
+/// caller already reloads its list after this screen pops, so this screen
+/// doesn't need to touch that controller at all - it just needs to save and
+/// get out of the way.
 class CategoryFormScreen extends StatefulWidget {
   const CategoryFormScreen({super.key, this.existing});
 

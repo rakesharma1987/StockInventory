@@ -1,34 +1,49 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:get/get.dart' hide Category;
 
+import '../../controllers/item_list_controller.dart';
 import '../../models/category.dart';
-import '../../viewmodels/item_list_viewmodel.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/item_card.dart';
 import 'item_detail_screen.dart';
 import 'item_form_screen.dart';
 
-class ItemListScreen extends StatelessWidget {
+class ItemListScreen extends StatefulWidget {
   const ItemListScreen({super.key, this.initialLowStockOnly = false});
 
   final bool initialLowStockOnly;
 
   @override
+  State<ItemListScreen> createState() => _ItemListScreenState();
+}
+
+class _ItemListScreenState extends State<ItemListScreen> {
+  @override
+  void initState() {
+    super.initState();
+    final vm = Get.put(ItemListController());
+    vm.lowStockOnly = widget.initialLowStockOnly;
+    vm.init();
+  }
+
+  @override
+  void dispose() {
+    Get.delete<ItemListController>();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) {
-        final vm = ItemListViewModel();
-        vm.lowStockOnly = initialLowStockOnly;
-        vm.init();
-        return vm;
-      },
-      child: const _ItemListBody(),
+    return GetBuilder<ItemListController>(
+      builder: (vm) => _ItemListBody(vm: vm),
     );
   }
 }
 
 class _ItemListBody extends StatefulWidget {
-  const _ItemListBody();
+  const _ItemListBody({required this.vm});
+
+  final ItemListController vm;
 
   @override
   State<_ItemListBody> createState() => _ItemListBodyState();
@@ -45,7 +60,7 @@ class _ItemListBodyState extends State<_ItemListBody> {
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<ItemListViewModel>();
+    final vm = widget.vm;
 
     return Scaffold(
       appBar: AppBar(
@@ -120,7 +135,7 @@ class _ItemListBodyState extends State<_ItemListBody> {
 
 class _FilterBar extends StatelessWidget {
   const _FilterBar({required this.vm});
-  final ItemListViewModel vm;
+  final ItemListController vm;
 
   @override
   Widget build(BuildContext context) {

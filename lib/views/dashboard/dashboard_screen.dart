@@ -1,45 +1,45 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:get/get.dart';
 
+import '../../controllers/dashboard_controller.dart';
+import '../../controllers/view_state.dart';
 import '../../core/utils/formatters.dart';
 import '../../models/stock_transaction.dart';
-import '../../viewmodels/dashboard_viewmodel.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/stat_tile.dart';
 import '../items/item_list_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
-  /// [viewModel]: pass in an already-created, longer-lived
-  /// DashboardViewModel (e.g. one owned by AppShell) so it can be refreshed
-  /// from outside - such as whenever the Dashboard tab is re-selected. If
-  /// omitted, this screen creates and owns its own (handy for previews or
-  /// standalone use).
-  const DashboardScreen({super.key, this.viewModel});
+  /// [controller]: pass in an already-created, longer-lived
+  /// DashboardController (e.g. one owned by AppShell, registered with
+  /// Get.put) so it can be refreshed from outside - such as whenever the
+  /// Dashboard tab is re-selected. If omitted, this screen creates and owns
+  /// its own (handy for previews or standalone use).
+  const DashboardScreen({super.key, this.controller});
 
-  final DashboardViewModel? viewModel;
+  final DashboardController? controller;
 
   @override
   Widget build(BuildContext context) {
-    if (viewModel != null) {
-      return ChangeNotifierProvider.value(
-        value: viewModel!,
-        child: const _DashboardBody(),
-      );
-    }
-    return ChangeNotifierProvider(
-      create: (_) => DashboardViewModel()..load(),
-      child: const _DashboardBody(),
+    final DashboardController vm = controller ??
+        (Get.isRegistered<DashboardController>()
+            ? Get.find<DashboardController>()
+            : Get.put(DashboardController()..load()));
+
+    return GetBuilder<DashboardController>(
+      init: vm,
+      builder: (vm) => _DashboardBody(vm: vm),
     );
   }
 }
 
 class _DashboardBody extends StatelessWidget {
-  const _DashboardBody();
+  const _DashboardBody({required this.vm});
+
+  final DashboardController vm;
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<DashboardViewModel>();
-
     return Scaffold(
       appBar: AppBar(title: const Text('Stock Inventory')),
       body: RefreshIndicator(

@@ -1,11 +1,11 @@
-import 'package:flutter/foundation.dart' hide Category;
+import 'package:get/get.dart' hide Category;
 
 import '../models/category.dart';
 import '../repositories/category_repository.dart';
 
 /// Backs the category list + add/edit category screens.
-class CategoryViewModel extends ChangeNotifier {
-  CategoryViewModel({CategoryRepository? repository})
+class CategoryController extends GetxController {
+  CategoryController({CategoryRepository? repository})
       : _repository = repository ?? CategoryRepository();
 
   final CategoryRepository _repository;
@@ -16,10 +16,10 @@ class CategoryViewModel extends ChangeNotifier {
 
   Future<void> load() async {
     isLoading = true;
-    notifyListeners();
+    update();
     categories = await _repository.getAll();
     isLoading = false;
-    notifyListeners();
+    update();
   }
 
   Future<String?> addCategory(String name, {String? description}) async {

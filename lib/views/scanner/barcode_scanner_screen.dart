@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:provider/provider.dart';
 
-import '../../viewmodels/scanner_viewmodel.dart';
+import '../../controllers/scanner_controller.dart';
 import '../items/item_detail_screen.dart';
 import '../items/item_form_screen.dart';
 
@@ -14,39 +14,59 @@ import '../items/item_form_screen.dart';
 ///   DB, and offers to open the matching item or create a new one.
 /// - [pickModeOnly]: just pops the scanned string back to the caller (used
 ///   by the item form's "scan barcode" field button).
-class BarcodeScannerScreen extends StatelessWidget {
+class BarcodeScannerScreen extends StatefulWidget {
   const BarcodeScannerScreen({super.key, this.pickModeOnly = false});
 
   final bool pickModeOnly;
 
   @override
+  State<BarcodeScannerScreen> createState() => _BarcodeScannerScreenState();
+}
+
+class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
+  @override
+  void initState() {
+    super.initState();
+    if (!widget.pickModeOnly) {
+      Get.put(ScannerController());
+    }
+  }
+
+  @override
+  void dispose() {
+    if (!widget.pickModeOnly) {
+      Get.delete<ScannerController>();
+    }
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (pickModeOnly) {
+    if (widget.pickModeOnly) {
       return _ScannerView(
         onDetect: (code) => Navigator.of(context).pop(code),
       );
     }
-    return ChangeNotifierProvider(
-      create: (_) => ScannerViewModel(),
-      child: const _LookupScannerBody(),
+    return GetBuilder<ScannerController>(
+      builder: (vm) => _LookupScannerBody(vm: vm),
     );
   }
 }
 
 class _LookupScannerBody extends StatelessWidget {
-  const _LookupScannerBody();
+  const _LookupScannerBody({required this.vm});
+
+  final ScannerController vm;
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<ScannerViewModel>();
-
     return Scaffold(
       appBar: AppBar(title: const Text('Scan Barcode')),
       body: Column(
         children: [
           Expanded(
             child: _ScannerView(
-              onDetect: (code) => context.read<ScannerViewModel>().onCodeScanned(code),
+              onDetect: (code) => vm.onCodeScanned(code),
             ),
           ),
           if (vm.result != ScanLookupResult.idle)
@@ -66,7 +86,7 @@ class _LookupScannerBody extends StatelessWidget {
 
 class _FoundBanner extends StatelessWidget {
   const _FoundBanner({required this.vm});
-  final ScannerViewModel vm;
+  final ScannerController vm;
 
   @override
   Widget build(BuildContext context) {
@@ -92,7 +112,7 @@ class _FoundBanner extends StatelessWidget {
 
 class _NotFoundBanner extends StatelessWidget {
   const _NotFoundBanner({required this.vm});
-  final ScannerViewModel vm;
+  final ScannerController vm;
 
   @override
   Widget build(BuildContext context) {
